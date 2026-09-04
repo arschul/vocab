@@ -184,9 +184,9 @@
   /* board mode */
   body.board .topbar{display:none;}
   .boardwrap{display:none;}
-  body.board .boardwrap{display:block;}
+  body.board .boardwrap{display:flex;}
   body.board .wrap{display:none;}
-  .boardwrap{padding:1.5rem;min-height:100vh;display:flex;flex-direction:column;}
+  body.board .boardwrap{padding:1.5rem;min-height:100vh;display:flex;flex-direction:column;}
   .bteams{display:flex;gap:1rem;margin-bottom:1rem;}
   .bteam{flex:1;background:var(--surface);border:2px solid var(--border);border-radius:16px;padding:.8rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.6rem;}
   .bteam.t1{border-color:var(--sky);} .bteam.t2{border-color:var(--tangerine);}
@@ -294,7 +294,10 @@ function parseHash(){
   const h=(location.hash||'#/').replace(/^#\/?/,'');
   return h.split('/').filter(Boolean);
 }
-function go(path){ location.hash='#/'+path; }
+function go(path){
+  const h='#/'+path;
+  if(location.hash===h) route(); else location.hash=h;
+}
 window.addEventListener('hashchange',route);
 
 function crumbs(parts){
@@ -310,7 +313,8 @@ function crumbs(parts){
 
 function route(){
   document.body.classList.remove('board');
-  speechSynthesis && speechSynthesis.cancel();
+  document.getElementById('boardwrap').innerHTML='';
+  if(window.speechSynthesis) speechSynthesis.cancel();
   const p=parseHash();
   if(p.length===0) return viewLevels();
   const lvl=M.levels.find(l=>l.id===p[0]);
@@ -571,8 +575,9 @@ function renderQuickPick(app,l,t,d,key){
 
 /* ── word race ── */
 function renderRace(app,l,t,d,key){
-  let score=0, left=60, timer=null, pool=shuffle(d.words), i=0;
+  let score=0, left=60, timer=null, pool=shuffle(d.words), i=0, over=false, pending=null;
   function ask(){
+    if(over) return;
     if(i>=pool.length){ pool=shuffle(d.words); i=0; }
     const w=pool[i++];
     const wrong=shuffle(d.words.filter(x=>x.w!==w.w)).slice(0,3);
@@ -588,19 +593,22 @@ function renderRace(app,l,t,d,key){
       </div>
       <div class="opts">${opts.map(o=>`<button class="opt" data-w="${esc(o.w)}">${esc(o.w)}</button>`).join('')}</div></div>`;
     app.querySelectorAll('.opt').forEach(el=>el.onclick=()=>{
+      if(over) return;
       if(el.dataset.w===w.w){ score++; el.classList.add('right'); }
       else { el.classList.add('wrong'); }
-      setTimeout(ask,190);
+      pending=setTimeout(ask,190);
     });
   }
   timer=setInterval(()=>{
     left--;
     const c=document.getElementById('clk');
     if(c){ c.childNodes[0].nodeValue=left+'s'; const b=document.querySelector('.bar i'); if(b) b.style.width=(left/60*100)+'%'; }
-    if(left<=0){ clearInterval(timer); done(); }
+    if(left<=0){ done(); }
   },1000);
-  window.addEventListener('hashchange',()=>clearInterval(timer),{once:true});
+  window.addEventListener('hashchange',()=>{ over=true; clearInterval(timer); clearTimeout(pending); },{once:true});
   function done(){
+    if(over) return;
+    over=true; clearInterval(timer); clearTimeout(pending);
     const got=score>=15?award(key,'racer'):false;
     app.innerHTML=`<div class="result"><div class="rem">${score>=15?'🏁':'⏱️'}</div>
       <h3>${score} words in 60 seconds</h3>
@@ -612,30 +620,42 @@ function renderRace(app,l,t,d,key){
 }
 
 /* ── word climb (leitner) ── */
+const CLIMB_SESSION = 20;
 function renderClimb(app,l,t,d,key){
   let boxes=getLeitner(key);
   d.words.forEach(w=>{ if(!boxes[w.w]) boxes[w.w]=1; });
+  let seen=0;
   function pick(){
     const weighted=[];
     d.words.forEach(w=>{ const b=boxes[w.w]; for(let n=0;n<(6-b);n++) weighted.push(w); });
     return weighted.length?weighted[Math.floor(Math.random()*weighted.length)]:null;
   }
   function counts(){ const c=[0,0,0,0,0]; d.words.forEach(w=>c[boxes[w.w]-1]++); return c; }
+  function mastered(){ return counts()[4]===d.words.length; }
   function boxbar(){
     const c=counts();
     return `<div class="boxes">${c.map((n,i)=>`<div class="box ${i===4&&n===d.words.length?'full':''}"><b>${n}</b><span>Box ${i+1}</span></div>`).join('')}</div>`;
   }
+  function grade(w,up){
+    boxes[w.w]= up ? Math.min(5,boxes[w.w]+1) : 1;
+    setLeitner(key,boxes); say(w.w); seen++;
+    if(mastered()) return summit();
+    if(seen>=CLIMB_SESSION) return breather();
+    step(false);
+  }
   function step(reveal,w){
-    if(counts()[4]===d.words.length) return done();
+    if(mastered()) return summit();
     w = w || pick();
     app.innerHTML=`
       <div class="gamehead"><h2>🏔️ Word Climb</h2>
+        <div class="stat"><div>${seen}/${CLIMB_SESSION}<span>this round</span></div><div>${counts()[4]}/${d.words.length}<span>mastered</span></div></div>
         <button class="btn ghost" onclick="go('${key}')">Quit</button></div>
+      <div class="bar"><i style="width:${seen/CLIMB_SESSION*100}%"></i></div>
       ${boxbar()}
       <div class="panel"><div class="prompt">
         <div class="pem">${w.e}</div>
         ${reveal
-          ? `<div class="pword">${esc(w.w)}</div><div class="pdef" style="color:var(--muted);font-size:1rem;margin-top:.5rem">${esc(w.d)}</div><div style="font-style:italic;color:var(--muted);margin-top:.6rem">“${esc(w.x)}”</div>`
+          ? `<div class="pword">${esc(w.w)}</div><div class="pdef" style="color:var(--muted);font-size:1rem;margin-top:.5rem">${esc(w.d)}</div><div style="font-style:italic;color:var(--muted);margin-top:.6rem">\u201C${esc(w.x)}\u201D</div>`
           : `<div class="pdef">${esc(w.d)}</div>`}
       </div>
       <div class="btnrow">
@@ -644,19 +664,33 @@ function renderClimb(app,l,t,d,key){
           : `<button class="btn" id="show">Show the word 👀</button>`}
       </div></div>`;
     if(reveal){
-      document.getElementById('knew').onclick=()=>{ boxes[w.w]=Math.min(5,boxes[w.w]+1); setLeitner(key,boxes); say(w.w); step(false); };
-      document.getElementById('nope').onclick=()=>{ boxes[w.w]=1; setLeitner(key,boxes); say(w.w); step(false); };
+      document.getElementById('knew').onclick=()=>grade(w,true);
+      document.getElementById('nope').onclick=()=>grade(w,false);
     } else {
       document.getElementById('show').onclick=()=>step(true,w);
     }
   }
-  function done(){
+  function breather(){
+    const c=counts();
+    app.innerHTML=`<div class="result"><div class="rem">⛰️</div>
+      <h3>Round complete</h3>
+      <p>${CLIMB_SESSION} cards done — ${c[4]} of ${d.words.length} words are at the top.</p></div>
+      ${boxbar()}
+      <div class="btnrow">
+        <button class="btn" id="again">Climb another round</button>
+        <button class="btn ghost" onclick="go('${key}')">Back to theme</button>
+      </div>`;
+    document.getElementById('again').onclick=()=>{ seen=0; step(false); };
+  }
+  function summit(){
     const got=award(key,'climber');
     app.innerHTML=`<div class="result"><div class="rem">🏔️</div><h3>Summit reached!</h3>
-      <p>Every word is in box 5. ${got?'Badge unlocked: Climber':'You already had the Climber badge.'}</p>
+      <p>Every word is in box 5. ${got?'Badge unlocked: Climber':'You already had the Climber badge.'}</p></div>
+      ${boxbar()}
       <div class="btnrow"><button class="btn ghost" onclick="resetClimb('${key}')">Reset boxes</button>
-      <button class="btn" onclick="go('${key}')">Back to theme</button></div></div>`;
+      <button class="btn" onclick="go('${key}')">Back to theme</button></div>`;
   }
+  if(mastered()) return summit();
   step(false);
 }
 function resetClimb(key){ setLeitner(key,{}); go(key+'/climb'); }
