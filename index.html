@@ -133,12 +133,13 @@
   .mcard .bigem{font-size:1.9rem;}
   @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
 
-  .memgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;}
+  .memgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:.6rem;}
   .memcard{
-    aspect-ratio:1;border-radius:14px;border:2px solid var(--border);background:var(--surface-2);
+    min-height:108px;border-radius:14px;border:2px solid var(--border);background:var(--surface-2);
     cursor:pointer;font-family:inherit;color:inherit;display:flex;align-items:center;justify-content:center;
-    font-size:1.5rem;transition:all .2s;padding:.35rem;text-align:center;
+    font-size:1.5rem;transition:all .2s;padding:.5rem;text-align:center;line-height:1.35;
   }
+  .memcard .def{font-size:.78rem;color:var(--muted);}
   .memcard .face{display:none;}
   .memcard.up .face,.memcard.done .face{display:block;}
   .memcard.up{border-color:var(--sky);background:var(--sky-deep);}
@@ -150,6 +151,8 @@
   .prompt{text-align:center;padding:2rem 1rem;}
   .prompt .pem{font-size:3.4rem;line-height:1;margin-bottom:.7rem;}
   .prompt .pdef{font-size:1.25rem;font-family:'Baloo 2',cursive;font-weight:600;line-height:1.4;}
+  .prompt .pgap{font-size:1.3rem;line-height:1.6;max-width:30ch;margin:0 auto;font-style:italic;}
+  .prompt .ppos{font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:.6rem;}
   .prompt .pword{font-size:2.2rem;font-family:'Baloo 2',cursive;font-weight:800;}
   .opts{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-top:1.3rem;}
   .opt{
@@ -197,7 +200,7 @@
     flex:1;background:var(--surface);border:1px solid var(--border);border-radius:24px;
     display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;gap:1rem;
   }
-  .bstage .bem{font-size:clamp(4rem,14vw,9rem);line-height:1;}
+  .bstage .bpos{font-size:.8rem;letter-spacing:4px;text-transform:uppercase;color:var(--muted);}
   .bstage .bdef{font-size:clamp(1.3rem,3.6vw,2.4rem);font-family:'Baloo 2',cursive;font-weight:600;max-width:22ch;line-height:1.3;}
   .bstage .bword{font-size:clamp(2.4rem,8vw,5.5rem);font-family:'Baloo 2',cursive;font-weight:800;color:var(--lime);}
   .bstage .bx{font-size:clamp(1rem,2.4vw,1.6rem);font-style:italic;color:var(--muted);max-width:28ch;}
@@ -237,7 +240,7 @@
     .wordrow{break-inside:avoid;}
   }
   @media(max-width:620px){
-    .memgrid{grid-template-columns:repeat(3,1fr);}
+    .memgrid{grid-template-columns:repeat(2,1fr);}
     .matchgrid{grid-template-columns:1fr;}
     .opts{grid-template-columns:1fr;}
     .boxes{grid-template-columns:repeat(5,1fr);}
@@ -267,7 +270,7 @@ const M = window.VOCAB_MANIFEST;
 const COLORS = ['c-pink','c-lime','c-sky','c-tangerine','c-grape','c-mint'];
 const BADGES = [
   {id:'explorer', ic:'📖', name:'Explorer',    how:'See every word in Study'},
-  {id:'matcher',  ic:'🧩', name:'Matcher',     how:'Finish Match Up'},
+  {id:'gapper',   ic:'🧩', name:'Gap Filler',  how:'Finish Sentence Gap'},
   {id:'memory',   ic:'🧠', name:'Memory Champ',how:'Finish Memory Pairs'},
   {id:'picker',   ic:'⚡', name:'Quick Picker',how:'Get 15/15 in Quick Pick'},
   {id:'racer',    ic:'🏁', name:'Racer',       how:'Score 15+ in Word Race'},
@@ -288,6 +291,26 @@ function getLeitner(key){ return lsGet('vocab-leitner',{})[key]||{}; }
 function setLeitner(key,obj){ const a=lsGet('vocab-leitner',{}); a[key]=obj; lsSet('vocab-leitner',a); }
 
 /* ─────────── helpers ─────────── */
+const IRREG={eat:['ate','eats'],go:['goes','went'],run:['runs','ran'],come:['comes','came'],
+  sleep:['sleeps','slept'],write:['writes','wrote'],read:['reads'],take:['takes','took'],
+  make:['makes','made'],have:['has','had'],buy:['buys','bought'],do:['does','did'],
+  get:['gets','got'],wear:['wears','wore'],put:['puts'],lose:['loses','lost']};
+function wordForms(w){
+  const p=w.split(' '), head=p[0], rest=p.slice(1).join(' ');
+  const f=new Set([head,head+'s',head+'es',head+'ing',head+'ed']);
+  if(head.endsWith('e')){ f.add(head.slice(0,-1)+'ing'); f.add(head+'d'); }
+  if(/[^aeiou][aeiou][^aeiouwxy]$/.test(head)){ f.add(head+head.slice(-1)+'ing'); f.add(head+head.slice(-1)+'ed'); }
+  if(head.endsWith('y')){ f.add(head.slice(0,-1)+'ies'); f.add(head.slice(0,-1)+'ied'); }
+  (IRREG[head.toLowerCase()]||[]).forEach(x=>f.add(x));
+  return [...f].map(x=>rest?x+' '+rest:x).sort((a,b)=>b.length-a.length);
+}
+function gapSentence(word,sent){
+  for(const v of wordForms(word)){
+    const re=new RegExp('(^|[^A-Za-z])('+v.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')(?![A-Za-z])','i');
+    if(re.test(sent)) return sent.replace(re,(m,a)=>a+'\u2005_____\u2005');
+  }
+  return null;
+}
 function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
@@ -480,7 +503,7 @@ function viewTheme(l,t,d,mode){
   const key=l.id+'/'+t.slug;
   if(mode==='menu')      return renderMenu(app,l,t,d,key);
   if(mode==='study')     return renderStudy(app,l,t,d,key);
-  if(mode==='match')     return renderMatch(app,l,t,d,key);
+  if(mode==='gap')       return renderGap(app,l,t,d,key);
   if(mode==='memory')    return renderMemory(app,l,t,d,key);
   if(mode==='quickpick') return renderQuickPick(app,l,t,d,key);
   if(mode==='race')      return renderRace(app,l,t,d,key);
@@ -500,8 +523,8 @@ function renderMenu(app,l,t,d,key){
     </div>
     <div class="modegrid">
       <button class="modebtn" onclick="go('${key}/study')"><span class="ic">📖</span>Study<small>Read, listen, learn</small></button>
-      <button class="modebtn" onclick="go('${key}/match')"><span class="ic">🧩</span>Match Up<small>Word to picture</small></button>
-      <button class="modebtn" onclick="go('${key}/memory')"><span class="ic">🧠</span>Memory Pairs<small>Flip and find</small></button>
+      <button class="modebtn" onclick="go('${key}/gap')"><span class="ic">🧩</span>Sentence Gap<small>Finish the sentence</small></button>
+      <button class="modebtn" onclick="go('${key}/memory')"><span class="ic">🧠</span>Memory Pairs<small>Word and meaning</small></button>
       <button class="modebtn" onclick="go('${key}/quickpick')"><span class="ic">⚡</span>Quick Pick<small>15 questions</small></button>
       <button class="modebtn" onclick="go('${key}/race')"><span class="ic">🏁</span>Word Race<small>Beat the clock</small></button>
       <button class="modebtn" onclick="go('${key}/climb')"><span class="ic">🏔️</span>Word Climb<small>Five boxes to master</small></button>
@@ -525,7 +548,6 @@ function renderStudy(app,l,t,d,key){
       <button class="btn ghost" onclick="go('${key}')">← Back</button></div>
     <div class="panel">`+
     d.words.map((w,i)=>`<div class="wordrow">
-      <div class="we">${w.e}</div>
       <div class="wb">
         <span class="ww">${esc(w.w)}</span><span class="wp">${esc(w.pos)}</span>
         <div class="wd">${esc(w.d)}</div>
@@ -547,55 +569,60 @@ function renderStudy(app,l,t,d,key){
   };
 }
 
-/* ── match up ── */
-function renderMatch(app,l,t,d,key){
-  const pool=shuffle(d.words); let idx=0, roundSize=5, solved=0, sel=null;
-  function round(){
-    const batch=pool.slice(idx,idx+roundSize);
-    if(!batch.length) return done();
-    const left=shuffle(batch), right=shuffle(batch);
+/* ── sentence gap ── */
+function renderGap(app,l,t,d,key){
+  const qs=shuffle(d.words); let i=0, score=0;
+  function ask(){
+    if(i>=qs.length) return done();
+    const w=qs[i];
+    const sent=gapSentence(w.w,w.x)||w.x;
+    const wrong=shuffle(d.words.filter(x=>x.w!==w.w)).slice(0,3);
+    const opts=shuffle([w,...wrong]);
     app.innerHTML=`
-      <div class="gamehead"><h2>🧩 Match Up</h2>
-        <div class="stat"><div>${solved}<span>matched</span></div><div>${d.words.length}<span>total</span></div></div>
+      <div class="gamehead"><h2>🧩 Sentence Gap</h2>
+        <div class="stat"><div>${i+1}/${qs.length}<span>sentence</span></div><div>${score}<span>correct</span></div></div>
         <button class="btn ghost" onclick="go('${key}')">Quit</button></div>
-      <div class="bar"><i style="width:${solved/d.words.length*100}%"></i></div>
-      <div class="matchgrid">
-        <div id="lcol">${left.map(w=>`<button class="mcard" data-w="${esc(w.w)}"><span class="bigword">${esc(w.w)}</span></button>`).join('')}</div>
-        <div id="rcol">${right.map(w=>`<button class="mcard" data-w="${esc(w.w)}"><span><span class="bigem">${w.e}</span><br>${esc(w.d)}</span></button>`).join('')}</div>
-      </div>`;
-    app.querySelectorAll('#lcol .mcard').forEach(el=>el.onclick=()=>{
-      app.querySelectorAll('#lcol .mcard').forEach(x=>x.classList.remove('sel'));
-      el.classList.add('sel'); sel=el; say(el.dataset.w);
-    });
-    app.querySelectorAll('#rcol .mcard').forEach(el=>el.onclick=()=>{
-      if(!sel) return;
-      if(el.dataset.w===sel.dataset.w){
-        el.classList.add('hit'); sel.classList.add('hit'); sel=null; solved++;
-        if(app.querySelectorAll('#lcol .mcard:not(.hit)').length===0){ idx+=roundSize; setTimeout(round,450); }
-        else { app.querySelector('.bar i').style.width=(solved/d.words.length*100)+'%'; }
-      } else {
-        el.classList.add('miss'); setTimeout(()=>el.classList.remove('miss'),400);
-      }
+      <div class="bar"><i style="width:${i/qs.length*100}%"></i></div>
+      <div class="panel"><div class="prompt">
+        <div class="ppos">Which word fits?</div>
+        <div class="pgap">${esc(sent)}</div>
+      </div>
+      <div class="opts">${opts.map(o=>`<button class="opt" data-w="${esc(o.w)}">${esc(o.w)}</button>`).join('')}</div></div>`;
+    app.querySelectorAll('.opt').forEach(el=>el.onclick=()=>{
+      app.querySelectorAll('.opt').forEach(x=>{ x.onclick=null;
+        if(x.dataset.w===w.w) x.classList.add('right');
+        else if(x===el) x.classList.add('wrong');
+      });
+      if(el.dataset.w===w.w) score++;
+      const p=app.querySelector('.pgap');
+      if(p) p.innerHTML=esc(w.x);
+      say(w.x);
+      i++; setTimeout(ask,1400);
     });
   }
   function done(){
-    const got=award(key,'matcher');
-    app.innerHTML=`<div class="result"><div class="rem">🧩</div><h3>All 25 matched!</h3>
-      <p>${got?'Badge unlocked: Matcher':'You already had the Matcher badge.'}</p>
-      <div class="btnrow"><button class="btn" onclick="go('${key}/match')">Play again</button>
+    const perfect=score===qs.length;
+    const got=perfect?award(key,'gapper'):false;
+    app.innerHTML=`<div class="result"><div class="rem">${perfect?'🧩':'👍'}</div>
+      <h3>${score} / ${qs.length}</h3>
+      <p>${perfect?(got?'Badge unlocked: Gap Filler':'You already had the Gap Filler badge.'):'Get every sentence right to unlock the Gap Filler badge.'}</p>
+      <div class="btnrow"><button class="btn" onclick="go('${key}/gap')">Play again</button>
       <button class="btn ghost" onclick="go('${key}')">Back to theme</button></div></div>`;
   }
-  round();
+  ask();
 }
 
-/* ── memory pairs ── */
+/* ── memory pairs: word ↔ meaning ── */
 function renderMemory(app,l,t,d,key){
   const pool=shuffle(d.words); let idx=0, roundSize=5, cleared=0;
   function round(){
     const batch=pool.slice(idx,idx+roundSize);
     if(!batch.length) return done();
     let cards=[];
-    batch.forEach(w=>{ cards.push({id:w.w,face:'<span class="txt">'+esc(w.w)+'</span>'}); cards.push({id:w.w,face:'<span style="font-size:1.9rem">'+w.e+'</span>'}); });
+    batch.forEach(w=>{
+      cards.push({id:w.w,say:w.w,face:'<span class="txt">'+esc(w.w)+'</span>'});
+      cards.push({id:w.w,say:w.d,face:'<span class="def">'+esc(w.d)+'</span>'});
+    });
     cards=shuffle(cards);
     let first=null, lock=false, found=0;
     app.innerHTML=`
@@ -603,10 +630,10 @@ function renderMemory(app,l,t,d,key){
         <div class="stat"><div>${cleared}<span>pairs found</span></div><div>${d.words.length}<span>total</span></div></div>
         <button class="btn ghost" onclick="go('${key}')">Quit</button></div>
       <div class="bar"><i style="width:${cleared/d.words.length*100}%"></i></div>
-      <div class="memgrid">${cards.map((c,i)=>`<button class="memcard" data-i="${i}" data-id="${esc(c.id)}"><span class="back">❔</span><span class="face">${c.face}</span></button>`).join('')}</div>`;
+      <div class="memgrid">${cards.map((c,i)=>`<button class="memcard" data-i="${i}" data-id="${esc(c.id)}" data-say="${esc(c.say)}"><span class="back">❔</span><span class="face">${c.face}</span></button>`).join('')}</div>`;
     app.querySelectorAll('.memcard').forEach(el=>el.onclick=()=>{
       if(lock||el.classList.contains('up')||el.classList.contains('done')) return;
-      el.classList.add('up'); say(el.dataset.id);
+      el.classList.add('up'); say(el.dataset.say);
       if(!first){ first=el; return; }
       lock=true;
       if(first.dataset.id===el.dataset.id && first!==el){
@@ -615,7 +642,7 @@ function renderMemory(app,l,t,d,key){
           if(found===batch.length){ idx+=roundSize; setTimeout(round,500); }
         },420);
       } else {
-        setTimeout(()=>{ first.classList.remove('up'); el.classList.remove('up'); first=null; lock=false; },780);
+        setTimeout(()=>{ first.classList.remove('up'); el.classList.remove('up'); first=null; lock=false; },900);
       }
     });
   }
@@ -643,7 +670,7 @@ function renderQuickPick(app,l,t,d,key){
         <button class="btn ghost" onclick="go('${key}')">Quit</button></div>
       <div class="bar"><i style="width:${i/qs.length*100}%"></i></div>
       <div class="panel"><div class="prompt">
-        <div class="pem">${w.e}</div>
+        <div class="ppos">${esc(w.pos)}</div>
         <div class="pdef">${esc(w.d)}</div>
       </div>
       <div class="opts">${opts.map(o=>`<button class="opt" data-w="${esc(o.w)}">${esc(o.w)}</button>`).join('')}</div></div>`;
@@ -678,14 +705,16 @@ function renderRace(app,l,t,d,key){
     const w=pool[i++];
     const wrong=shuffle(d.words.filter(x=>x.w!==w.w)).slice(0,3);
     const opts=shuffle([w,...wrong]);
+    const useGap=Math.random()<0.5;
     app.innerHTML=`
       <div class="gamehead"><h2>🏁 Word Race</h2>
         <div class="stat"><div id="clk">${left}s<span>left</span></div><div>${score}<span>score</span></div></div>
         <button class="btn ghost" onclick="go('${key}')">Quit</button></div>
       <div class="bar"><i style="width:${left/60*100}%"></i></div>
       <div class="panel"><div class="prompt">
-        <div class="pem">${w.e}</div>
-        <div class="pdef">${esc(w.d)}</div>
+        ${useGap
+          ? `<div class="ppos">Which word fits?</div><div class="pgap">${esc(gapSentence(w.w,w.x)||w.x)}</div>`
+          : `<div class="ppos">${esc(w.pos)}</div><div class="pdef">${esc(w.d)}</div>`}
       </div>
       <div class="opts">${opts.map(o=>`<button class="opt" data-w="${esc(o.w)}">${esc(o.w)}</button>`).join('')}</div></div>`;
     app.querySelectorAll('.opt').forEach(el=>el.onclick=()=>{
@@ -749,7 +778,7 @@ function renderClimb(app,l,t,d,key){
       <div class="bar"><i style="width:${seen/CLIMB_SESSION*100}%"></i></div>
       ${boxbar()}
       <div class="panel"><div class="prompt">
-        <div class="pem">${w.e}</div>
+        <div class="ppos">${esc(w.pos)}</div>
         ${reveal
           ? `<div class="pword">${esc(w.w)}</div><div class="pdef" style="color:var(--muted);font-size:1rem;margin-top:.5rem">${esc(w.d)}</div><div style="font-style:italic;color:var(--muted);margin-top:.6rem">\u201C${esc(w.x)}\u201D</div>`
           : `<div class="pdef">${esc(w.d)}</div>`}
@@ -806,9 +835,9 @@ function renderBoard(l,t,d,key){
           <button onclick="bScore(2,-1)">−</button><span class="sc" id="s2">${s2}</span><button onclick="bScore(2,1)">+</button></div>
       </div>
       <div class="bstage">
-        <div class="bem">${w.e}</div>
+        <div class="bpos">${esc(w.pos)}</div>
         ${reveal ? `<div class="bword">${esc(w.w)}</div><div class="bx">“${esc(w.x)}”</div>`
-                 : `<div class="bdef">${esc(w.d)}</div>`}
+                 : `<div class="bdef">${esc(w.d)}</div><div class="bx">“${esc(gapSentence(w.w,w.x)||w.x)}”</div>`}
       </div>
       <div class="bctrl">
         ${reveal ? `<button class="btn mint" onclick="bSay()">🔊 Say it</button><button class="btn" onclick="bNext()">Next word →</button>`
@@ -833,7 +862,6 @@ function renderPrint(app,l,t,d,key){
       <button class="btn ghost" onclick="go('${key}')">← Back</button></div></div>
     <div class="panel">`+
     d.words.map(w=>`<div class="wordrow">
-      <div class="we">${w.e}</div>
       <div class="wb"><span class="ww">${esc(w.w)}</span><span class="wp">${esc(w.pos)}</span>
       <div class="wd">${esc(w.d)}</div><div class="wx">“${esc(w.x)}”</div></div>
     </div>`).join('')+`</div>`;
