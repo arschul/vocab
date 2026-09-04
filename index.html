@@ -443,12 +443,17 @@ function renderStudy(app,l,t,d,key){
       <button class="spk" onclick="say(${JSON.stringify(w.w).replace(/"/g,'&quot;')})" title="Listen">🔊</button>
     </div>`).join('')+
     `</div>
-    <div class="btnrow"><button class="btn" onclick="finishStudy('${key}')">I've read them all ✓</button></div>`;
-}
-function finishStudy(key){
-  const got=award(key,'explorer');
-  alert(got?'📖 Badge unlocked: Explorer!':'You already have the Explorer badge.');
-  go(key);
+    <div class="btnrow"><button class="btn" id="studydone">I've read them all ✓</button></div>`;
+  document.getElementById('studydone').onclick=()=>{
+    const got=award(key,'explorer');
+    app.innerHTML=`<div class="result"><div class="rem">📖</div>
+      <h3>${d.words.length} words read</h3>
+      <p>${got?'Badge unlocked: Explorer':'You already had the Explorer badge.'}</p>
+      <div class="btnrow">
+        <button class="btn" onclick="go('${key}/quickpick')">Try Quick Pick ⚡</button>
+        <button class="btn ghost" onclick="go('${key}')">Back to theme</button>
+      </div></div>`;
+  };
 }
 
 /* ── match up ── */
