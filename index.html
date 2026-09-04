@@ -204,6 +204,32 @@
   .bctrl{display:flex;gap:.7rem;justify-content:center;margin-top:1rem;flex-wrap:wrap;}
   .bctrl .btn{padding:.85rem 2rem;font-size:1.15rem;}
 
+  .voicepanel{
+    position:fixed;top:64px;right:1rem;z-index:30;width:min(340px,calc(100vw - 2rem));
+    background:var(--surface);border:1px solid var(--border);border-radius:18px;
+    box-shadow:0 18px 48px rgba(0,0,0,.35);padding:1.1rem;display:none;
+    max-height:70vh;overflow:auto;
+  }
+  .voicepanel.open{display:block;}
+  .voicepanel h3{font-size:1.15rem;margin-bottom:.2rem;}
+  .voicepanel .vsub{color:var(--muted);font-size:.8rem;line-height:1.5;margin-bottom:.9rem;}
+  .vrow{
+    display:flex;align-items:center;gap:.6rem;padding:.55rem .6rem;border-radius:12px;
+    border:2px solid transparent;cursor:pointer;transition:all .15s;
+  }
+  .vrow:hover{background:var(--surface-2);}
+  .vrow.on{border-color:var(--mint);background:var(--mint-deep);}
+  .vrow .vn{flex:1;min-width:0;}
+  .vrow .vn b{font-family:'Baloo 2',cursive;font-weight:600;font-size:.95rem;display:block;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .vrow .vn span{color:var(--muted);font-size:.72rem;}
+  .vrow .vtest{
+    border:1px solid var(--border);background:var(--surface);color:var(--muted);
+    border-radius:9px;width:32px;height:32px;cursor:pointer;flex-shrink:0;font-size:.85rem;
+  }
+  .vrow .vtest:hover{color:var(--sky);border-color:var(--sky);}
+  .vempty{color:var(--muted);font-size:.85rem;line-height:1.6;}
+
   @media print{
     .topbar,.modegrid,.btnrow,.hero p,.spk{display:none!important;}
     body{background:#fff;color:#000;}
@@ -222,9 +248,12 @@
 
 <div class="topbar">
   <div class="crumbs" id="crumbs"></div>
+  <button class="iconbtn" onclick="toggleVoicePanel()" title="Choose the voice">🗣️</button>
   <button class="iconbtn" id="theme-btn" onclick="toggleTheme()" title="Light / dark">🌙</button>
   <button class="iconbtn" onclick="location.href='https://arschul.github.io/'" title="Classroom Hub">🏠</button>
 </div>
+
+<div class="voicepanel" id="voicepanel"></div>
 
 <div class="wrap" id="app"></div>
 
@@ -263,19 +292,81 @@ function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.fl
 function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 let voice=null;
-function pickVoice(){
-  const vs=speechSynthesis.getVoices();
-  voice = vs.find(v=>/en[-_]US/i.test(v.lang)&&/female|samantha|zira|google/i.test(v.name))
-       || vs.find(v=>/en[-_]US/i.test(v.lang)) || vs.find(v=>/^en/i.test(v.lang)) || null;
+function enVoices(){
+  if(!('speechSynthesis' in window)) return [];
+  return speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang));
 }
-if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged=pickVoice; }
+function savedVoiceId(){ try{ return localStorage.getItem('vocab-voice'); }catch(e){ return null; } }
+function pickVoice(){
+  const vs=enVoices();
+  const saved=savedVoiceId();
+  if(saved){
+    const hit=vs.find(v=>(v.voiceURI||v.name)===saved);
+    if(hit){ voice=hit; return; }
+  }
+  voice = vs.find(v=>/en[-_]US/i.test(v.lang)&&/female|samantha|zira|google/i.test(v.name))
+       || vs.find(v=>/en[-_]US/i.test(v.lang)) || vs[0] || null;
+}
+function setVoice(id){
+  try{ id ? localStorage.setItem('vocab-voice',id) : localStorage.removeItem('vocab-voice'); }catch(e){}
+  pickVoice(); renderVoicePanel();
+  if(voice) say('This is your new voice.');
+}
+if('speechSynthesis' in window){
+  pickVoice();
+  speechSynthesis.onvoiceschanged=()=>{ pickVoice(); if(document.getElementById('voicepanel').classList.contains('open')) renderVoicePanel(); };
+}
 function say(text){
   if(!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text);
-  u.lang='en-US'; u.rate=.9; if(voice) u.voice=voice;
+  u.lang=(voice&&voice.lang)||'en-US'; u.rate=.9; if(voice) u.voice=voice;
   speechSynthesis.speak(u);
 }
+function toggleVoicePanel(){
+  const p=document.getElementById('voicepanel');
+  p.classList.toggle('open');
+  if(p.classList.contains('open')) renderVoicePanel();
+}
+function renderVoicePanel(){
+  const p=document.getElementById('voicepanel');
+  const vs=enVoices(), saved=savedVoiceId();
+  if(!vs.length){
+    p.innerHTML=`<h3>Voice</h3><p class="vempty">No English voices are installed on this device, so listening is turned off. Voices come from the device or browser, not from this page.</p>`;
+    return;
+  }
+  const auto=!saved;
+  p.innerHTML=`<h3>Voice</h3>
+    <p class="vsub">Used for every word and example in the hub. Voices come from this device, so the list changes from computer to computer.</p>
+    <div class="vrow ${auto?'on':''}" data-id="">
+      <div class="vn"><b>Automatic</b><span>Best English voice available${auto&&voice?' \u2014 now: '+esc(voice.name):''}</span></div>
+    </div>` +
+    vs.map(v=>{
+      const id=v.voiceURI||v.name;
+      return `<div class="vrow ${saved===id?'on':''}" data-id="${esc(id)}">
+        <div class="vn"><b>${esc(v.name)}</b><span>${esc(v.lang)}${v.localService?' \u00B7 offline':''}</span></div>
+        <button class="vtest" data-test="${esc(id)}" title="Hear this voice">\u25B6</button>
+      </div>`;
+    }).join('');
+  p.querySelectorAll('.vrow').forEach(r=>r.onclick=e=>{
+    if(e.target.closest('.vtest')) return;
+    setVoice(r.dataset.id||null);
+  });
+  p.querySelectorAll('.vtest').forEach(b=>b.onclick=()=>{
+    const v=enVoices().find(x=>(x.voiceURI||x.name)===b.dataset.test);
+    if(!v) return;
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance('The apple is red.');
+    u.voice=v; u.lang=v.lang; u.rate=.9;
+    speechSynthesis.speak(u);
+  });
+}
+document.addEventListener('click',e=>{
+  const p=document.getElementById('voicepanel');
+  if(!p.classList.contains('open')) return;
+  if(p.contains(e.target)||e.target.closest('.iconbtn')) return;
+  p.classList.remove('open');
+});
 
 function loadTheme(level,slug){
   const key=level+'/'+slug;
