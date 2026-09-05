@@ -151,8 +151,14 @@
   .prompt{text-align:center;padding:2rem 1rem;}
   .prompt .pem{font-size:3.4rem;line-height:1;margin-bottom:.7rem;}
   .prompt .pdef{font-size:1.25rem;font-family:'Baloo 2',cursive;font-weight:600;line-height:1.4;}
-  .prompt .pgap{font-size:1.3rem;line-height:1.6;max-width:30ch;margin:0 auto;font-style:italic;}
+  .prompt .pgap{font-size:1.3rem;line-height:1.7;max-width:30ch;margin:0 auto;font-style:italic;word-spacing:.15em;}
   .prompt .ppos{font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:.6rem;}
+  .prompt .phint{
+    margin:1rem auto 0;padding-top:.9rem;border-top:1px dashed var(--border);
+    color:var(--muted);font-size:.95rem;line-height:1.5;max-width:32ch;
+  }
+  .prompt .phint b{display:block;font-family:'Baloo 2',cursive;font-weight:600;
+    font-size:.68rem;letter-spacing:2px;text-transform:uppercase;opacity:.75;margin-bottom:.3rem;}
   .prompt .pword{font-size:2.2rem;font-family:'Baloo 2',cursive;font-weight:800;}
   .opts{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-top:1.3rem;}
   .opt{
@@ -291,25 +297,10 @@ function getLeitner(key){ return lsGet('vocab-leitner',{})[key]||{}; }
 function setLeitner(key,obj){ const a=lsGet('vocab-leitner',{}); a[key]=obj; lsSet('vocab-leitner',a); }
 
 /* ─────────── helpers ─────────── */
-const IRREG={eat:['ate','eats'],go:['goes','went'],run:['runs','ran'],come:['comes','came'],
-  sleep:['sleeps','slept'],write:['writes','wrote'],read:['reads'],take:['takes','took'],
-  make:['makes','made'],have:['has','had'],buy:['buys','bought'],do:['does','did'],
-  get:['gets','got'],wear:['wears','wore'],put:['puts'],lose:['loses','lost']};
-function wordForms(w){
-  const p=w.split(' '), head=p[0], rest=p.slice(1).join(' ');
-  const f=new Set([head,head+'s',head+'es',head+'ing',head+'ed']);
-  if(head.endsWith('e')){ f.add(head.slice(0,-1)+'ing'); f.add(head+'d'); }
-  if(/[^aeiou][aeiou][^aeiouwxy]$/.test(head)){ f.add(head+head.slice(-1)+'ing'); f.add(head+head.slice(-1)+'ed'); }
-  if(head.endsWith('y')){ f.add(head.slice(0,-1)+'ies'); f.add(head.slice(0,-1)+'ied'); }
-  (IRREG[head.toLowerCase()]||[]).forEach(x=>f.add(x));
-  return [...f].map(x=>rest?x+' '+rest:x).sort((a,b)=>b.length-a.length);
-}
 function gapSentence(word,sent){
-  for(const v of wordForms(word)){
-    const re=new RegExp('(^|[^A-Za-z])('+v.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')(?![A-Za-z])','i');
-    if(re.test(sent)) return sent.replace(re,(m,a)=>a+'\u2005_____\u2005');
-  }
-  return null;
+  const re=new RegExp('(^|[^A-Za-z])('+word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')(?![A-Za-z])','i');
+  if(!re.test(sent)) return null;
+  return sent.replace(re,(m,a)=>a+'_____');
 }
 function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -586,6 +577,7 @@ function renderGap(app,l,t,d,key){
       <div class="panel"><div class="prompt">
         <div class="ppos">Which word fits?</div>
         <div class="pgap">${esc(sent)}</div>
+        <div class="phint"><b>It means</b>${esc(w.d)}</div>
       </div>
       <div class="opts">${opts.map(o=>`<button class="opt" data-w="${esc(o.w)}">${esc(o.w)}</button>`).join('')}</div></div>`;
     app.querySelectorAll('.opt').forEach(el=>el.onclick=()=>{
@@ -672,6 +664,7 @@ function renderQuickPick(app,l,t,d,key){
       <div class="panel"><div class="prompt">
         <div class="ppos">${esc(w.pos)}</div>
         <div class="pdef">${esc(w.d)}</div>
+        <div class="phint"><b>In a sentence</b>${esc(gapSentence(w.w,w.x)||w.x)}</div>
       </div>
       <div class="opts">${opts.map(o=>`<button class="opt" data-w="${esc(o.w)}">${esc(o.w)}</button>`).join('')}</div></div>`;
     app.querySelectorAll('.opt').forEach(el=>el.onclick=()=>{
@@ -713,8 +706,10 @@ function renderRace(app,l,t,d,key){
       <div class="bar"><i style="width:${left/60*100}%"></i></div>
       <div class="panel"><div class="prompt">
         ${useGap
-          ? `<div class="ppos">Which word fits?</div><div class="pgap">${esc(gapSentence(w.w,w.x)||w.x)}</div>`
-          : `<div class="ppos">${esc(w.pos)}</div><div class="pdef">${esc(w.d)}</div>`}
+          ? `<div class="ppos">Which word fits?</div><div class="pgap">${esc(gapSentence(w.w,w.x)||w.x)}</div>
+             <div class="phint"><b>It means</b>${esc(w.d)}</div>`
+          : `<div class="ppos">${esc(w.pos)}</div><div class="pdef">${esc(w.d)}</div>
+             <div class="phint"><b>In a sentence</b>${esc(gapSentence(w.w,w.x)||w.x)}</div>`}
       </div>
       <div class="opts">${opts.map(o=>`<button class="opt" data-w="${esc(o.w)}">${esc(o.w)}</button>`).join('')}</div></div>`;
     app.querySelectorAll('.opt').forEach(el=>el.onclick=()=>{
@@ -781,7 +776,8 @@ function renderClimb(app,l,t,d,key){
         <div class="ppos">${esc(w.pos)}</div>
         ${reveal
           ? `<div class="pword">${esc(w.w)}</div><div class="pdef" style="color:var(--muted);font-size:1rem;margin-top:.5rem">${esc(w.d)}</div><div style="font-style:italic;color:var(--muted);margin-top:.6rem">\u201C${esc(w.x)}\u201D</div>`
-          : `<div class="pdef">${esc(w.d)}</div>`}
+          : `<div class="pdef">${esc(w.d)}</div>
+             <div class="phint"><b>In a sentence</b>${esc(gapSentence(w.w,w.x)||w.x)}</div>`}
       </div>
       <div class="btnrow">
         ${reveal
