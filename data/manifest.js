@@ -17,7 +17,23 @@ window.VOCAB_MANIFEST = {
         { slug: 'animals',              title: 'Animals',                emoji: '\u{1F415}' }
       ]
     },
-    { id: 'a2', name: 'A2', tagline: 'Elementary',   blurb: 'Coming soon.', ready: false, themes: [] },
+    {
+      id: 'a2',
+      name: 'A2',
+      tagline: 'Elementary',
+      blurb: 'Everyday life beyond the basics \u2014 shopping, health, travel, work and feelings.',
+      ready: true,
+      themes: [
+        { slug: 'shopping-money',        title: 'Shopping & Money',       emoji: '\u{1F6D2}' },
+        { slug: 'health-body',           title: 'Health & Body',          emoji: '\u{1FA7A}' },
+        { slug: 'travel-transport',      title: 'Travel & Transport',     emoji: '\u2708\uFE0F' },
+        { slug: 'school-study',          title: 'School & Study',         emoji: '\u{1F393}' },
+        { slug: 'free-time',             title: 'Free Time & Hobbies',    emoji: '\u{1F3B8}' },
+        { slug: 'town-directions',       title: 'Town & Directions',      emoji: '\u{1F5FA}\uFE0F' },
+        { slug: 'jobs-work',             title: 'Jobs & Work',            emoji: '\u{1F4BC}' },
+        { slug: 'feelings-personality',  title: 'Feelings & Personality', emoji: '\u{1F60A}' }
+      ]
+    },
     { id: 'b1', name: 'B1', tagline: 'Intermediate', blurb: 'Coming soon.', ready: false, themes: [] },
     { id: 'b2', name: 'B2', tagline: 'Upper',        blurb: 'Coming soon.', ready: false, themes: [] }
   ]
