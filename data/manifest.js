@@ -34,7 +34,23 @@ window.VOCAB_MANIFEST = {
         { slug: 'feelings-personality',  title: 'Feelings & Personality', emoji: '\u{1F60A}' }
       ]
     },
-    { id: 'b1', name: 'B1', tagline: 'Intermediate', blurb: 'Coming soon.', ready: false, themes: [] },
+    {
+      id: 'b1',
+      name: 'B1',
+      tagline: 'Intermediate',
+      blurb: 'Bigger topics \u2014 environment, technology, media, law and holding an argument.',
+      ready: true,
+      themes: [
+        { slug: 'environment-nature',   title: 'Environment & Nature',   emoji: '\u{1F30D}' },
+        { slug: 'technology-internet',  title: 'Technology & Internet',  emoji: '\u{1F4BB}' },
+        { slug: 'media-news',           title: 'Media & News',           emoji: '\u{1F4F0}' },
+        { slug: 'relationships',        title: 'Relationships',          emoji: '\u{1F91D}' },
+        { slug: 'crime-law',            title: 'Crime & Law',            emoji: '\u2696\uFE0F' },
+        { slug: 'sport-fitness',        title: 'Sport & Fitness',        emoji: '\u{1F3C6}' },
+        { slug: 'housing-living',       title: 'Housing & Living',       emoji: '\u{1F511}' },
+        { slug: 'opinions-argument',    title: 'Opinions & Argument',    emoji: '\u{1F4AC}' }
+      ]
+    },
     { id: 'b2', name: 'B2', tagline: 'Upper',        blurb: 'Coming soon.', ready: false, themes: [] }
   ]
 };
