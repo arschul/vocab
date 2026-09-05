@@ -5,7 +5,7 @@ window.VOCAB_DATA['a2/jobs-work'] = {
     {w:'job',pos:'noun',d:'the work a person does for money',x:'She found a new job in May.',m:'A job is countable; work is not. Not a work.'},
     {w:'career',pos:'noun',d:'the work you do over many years',x:'He had a long career in teaching.',m:'A career is your working life; a job is one position.'},
     {w:'office',pos:'noun',d:'a place with desks where people work',x:'Our office is on the fourth floor.',m:'At the office or in the office, not on the office.'},
-    {w:'boss',pos:'noun',d:'the person who is in charge of you',x:'My boss is on holiday.',m:'Informal. Manager is the neutral word.'},
+    {w:'boss',pos:'noun',d:'the person who is in charge of you',x:'My boss is on vacation.',m:'Informal. Manager is the neutral word.'},
     {w:'manager',pos:'noun',d:'a person who runs a team or a shop',x:'Ask the manager for help.',m:'Manage is the verb, management is the activity.'},
     {w:'employee',pos:'noun',d:'a person who works for a company',x:'Every employee gets a uniform.',m:'An employee works for an employer.'},
     {w:'colleague',pos:'noun',d:'a person you work with',x:'I had lunch with a colleague.',m:'Colleague, not partner, for someone at your work.'},
