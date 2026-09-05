@@ -51,6 +51,23 @@ window.VOCAB_MANIFEST = {
         { slug: 'opinions-argument',    title: 'Opinions & Argument',    emoji: '\u{1F4AC}' }
       ]
     },
-    { id: 'b2', name: 'B2', tagline: 'Upper',        blurb: 'Coming soon.', ready: false, themes: [] }
+    {
+      id: 'b2',
+      name: 'B2',
+      tagline: 'Upper',
+      blurb: 'Abstract and academic \u2014 economy, research, politics, ethics and describing data.',
+      ready: true,
+      tags: true,
+      themes: [
+        { slug: 'business-economy',        title: 'Business & Economy',        emoji: '\u{1F4C8}' },
+        { slug: 'science-research',        title: 'Science & Research',        emoji: '\u{1F52C}' },
+        { slug: 'politics-society',        title: 'Politics & Society',        emoji: '\u{1F3DB}\uFE0F' },
+        { slug: 'psychology-behavior',     title: 'Psychology & Behavior',     emoji: '\u{1F9E0}' },
+        { slug: 'arts-culture',            title: 'Arts & Culture',            emoji: '\u{1F3AD}' },
+        { slug: 'globalization-migration', title: 'Globalization & Migration', emoji: '\u{1F310}' },
+        { slug: 'ethics-decisions',        title: 'Ethics & Decisions',        emoji: '\u{1F9ED}' },
+        { slug: 'trends-data',             title: 'Trends & Data',             emoji: '\u{1F4CA}' }
+      ]
+    }
   ]
 };
