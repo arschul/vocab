@@ -5,7 +5,8 @@ Live: https://arschul.github.io/vocab/
 
 ## Status
 - **A1** — 8 themes × 25 words (200 words) — built
-- A2 / B1 / B2 — planned
+- **A2** — 8 themes × 25 words (200 words) — built, adds a common-mistake tip per word
+- B1 / B2 — planned
 
 ## Structure
 - `index.html` — hash-routed shell (`#/level/theme/mode`), all modes and game logic inline
@@ -24,7 +25,22 @@ emoji sets have no reliable one-to-one mapping to vocabulary (the closest glyph 
 swimsuit), and a wrong picture teaches the wrong word. Theme-level icons remain, since those are
 category labels rather than word meanings.
 
-Richness scales by level: A2 adds a common-mistake tip, B1 adds collocations and word family, B2 adds usage notes and tags.
+Richness scales by level. A2 entries add `m`, a one-line common-mistake tip in English, shown in
+Study, Print, and on reveal in Word Climb and Board Mode:
+
+```js
+{ w:'money', pos:'noun', d:'coins and notes used to buy things',
+  x:'I do not have enough money.', m:'Uncountable: much money, not many moneys.' }
+```
+
+B1 will add collocations and word family, B2 usage notes and tags.
+
+### Adding a level
+1. Write `data/<level>-<theme>.js` for each theme, then flip `ready: true` in `data/manifest.js`.
+2. Every example must contain its headword verbatim in base form (the gap invariant above).
+3. Extend `NOUNY_VERBS` / `VERBY_NOUNS` in `index.html` with any new word that works as both noun
+   and verb, or Sentence Gap will offer a wrong answer that actually fits.
+4. Re-run the pair audit before shipping.
 
 ## Modes
 Study · Sentence Gap · Memory Pairs · Quick Pick · Word Race · Word Climb (Leitner) · Board Mode (two teams, projector) · Print
