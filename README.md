@@ -7,7 +7,9 @@ Live: https://arschul.github.io/vocab/
 - **A1** — 8 themes × 25 words (200 words) — built
 - **A2** — 8 themes × 25 words (200 words) — built, adds a common-mistake tip per word
 - **B1** — 8 themes × 25 words (200 words) — built, adds collocations and word family
-- B2 — planned
+- **B2** — 8 themes × 25 words (200 words) — built, adds usage notes and tags
+
+800 words total across four levels.
 
 All data is American English (spelling and word choice).
 
@@ -48,7 +50,30 @@ B1 entries add `c`, an array of collocations, and `f`, the word family:
 
 Collocations render as chips in Study and Print, and appear on reveal in Word Climb and Board Mode.
 Use `'\u2014'` for `f` when there is no useful family; it is skipped at render time.
-B2 will add usage notes and tags.
+B2 entries add `u`, a usage/register note, and `t`, an array of tags:
+
+```js
+{ w:'revenue', pos:'noun', d:'the total money a business takes in',
+  x:'Advertising revenue fell sharply.',
+  m:'Usually uncountable. Say REV-en-yoo.',
+  c:['annual revenue','generate revenue','revenue stream'], f:'—',
+  u:'Standard in reports and business writing rather than conversation.',
+  t:['formal','uncountable'] }
+```
+
+### Tags and the label review mode
+Tags are a controlled set defined by `TAG_INFO` in `index.html`: `academic`, `formal`,
+`confusable`, `uncountable`, `irregular`, `linking`. Adding a tag outside that set means adding it
+to `TAG_INFO` too, or it will not appear in the index.
+
+Tags drive **Review by label** — a level-scope mode that crosses themes, at `#/<level>/tags`:
+
+- `#/b2/tags` — index of labels with word counts
+- `#/b2/tags/<tag>` — every word carrying that label, from all eight themes, with usage notes
+- `#/b2/tags/<tag>/drill` — a 15-question drill over that set
+
+The entry point appears on the level's theme grid only when the level has `tags: true` in the
+manifest. The mode is review, not progression — it awards no badges, since badges are per theme.
 
 ### Adding a level
 1. Write `data/<level>-<theme>.js` for each theme, then flip `ready: true` in `data/manifest.js`.
