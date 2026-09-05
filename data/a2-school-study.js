@@ -2,7 +2,7 @@ window.VOCAB_DATA = window.VOCAB_DATA || {};
 window.VOCAB_DATA['a2/school-study'] = {
   level:'a2', slug:'school-study', title:'School & Study', emoji:'\u{1F393}',
   words:[
-    {w:'subject',pos:'noun',d:'an area you study, like maths or history',x:'My favourite subject is geography.',m:'A school subject, not a matter or a discipline.'},
+    {w:'subject',pos:'noun',d:'an area you study, like maths or history',x:'My favorite subject is geography.',m:'A school subject, not a matter or a discipline.'},
     {w:'lesson',pos:'noun',d:'a period of teaching',x:'The lesson starts at eight.',m:'Have a lesson, not make a lesson.'},
     {w:'homework',pos:'noun',d:'school work you do at home',x:'I finished my homework early.',m:'Uncountable: much homework, not homeworks. Do homework, not make it.'},
     {w:'exam',pos:'noun',d:'an important test of what you know',x:'We have an exam on Friday.',m:'Take or sit an exam. Pass means succeed, not just take.'},
@@ -24,7 +24,7 @@ window.VOCAB_DATA['a2/school-study'] = {
     {w:'answer',pos:'noun',d:'what you say or write to a question',x:'Write your answer in the box.',m:'An answer to a question, not of a question.'},
     {w:'question',pos:'noun',d:'something you ask',x:'Put your hand up if you have a question.',m:'Ask a question, not make a question.'},
     {w:'project',pos:'noun',d:'a piece of work done over time',x:'We finished the project together.',m:'Work on a project, not work in a project.'},
-    {w:'practice',pos:'noun',d:'doing something often to get better',x:'You need more practice with verbs.',m:'Practice is the noun; practise is the verb in British spelling.'},
+    {w:'practice',pos:'noun',d:'doing something often to get better',x:'You need more practice with verbs.',m:'Practice is the noun; practice is the verb in British spelling.'},
     {w:'absent',pos:'adjective',d:'not at school or work',x:'Two students were absent today.',m:'Be absent from a place.'},
     {w:'notes',pos:'noun',d:'short things you write to remember',x:'I take notes in every lesson.',m:'Take notes, not write down notes as one fixed phrase.'}
   ]
