@@ -29,8 +29,20 @@ Richness scales by level: A2 adds a common-mistake tip, B1 adds collocations and
 ## Modes
 Study · Sentence Gap · Memory Pairs · Quick Pick · Word Race · Word Climb (Leitner) · Board Mode (two teams, projector) · Print
 
-- **Sentence Gap** — the example sentence with the target word blanked, four options. Inflected forms
-  are matched by `gapSentence()`; all 200 A1 words currently produce a clean gap.
+- **Sentence Gap** — the example sentence with the target word blanked, four options, plus the
+  definition shown as a second cue.
+
+### Two cues, always
+Sentence Gap, Quick Pick, Word Race and Word Climb all show **both** the definition and the gapped
+sentence — one as the main prompt, the other as a supporting hint. Neither is reliable alone: a gap
+like "Please give me some _____." accepts water, juice or cake, and some definitions within a theme
+are near-twins (walk/run, grandmother/grandfather). Together they identify exactly one word.
+
+### Gap invariant
+`gapSentence()` matches the **base form only** — no inflection guessing. Every example sentence must
+contain its headword verbatim, so the blank always accepts the word exactly as shown on the option
+button. Adding a sentence like "He eats two eggs" would break this: the option reads *egg* but the
+blank needs *eggs*. All 200 A1 entries satisfy the invariant and round-trip cleanly.
 - **Memory Pairs** — word card matched to its meaning card.
 - **Word Race** — mixes definition prompts and gap prompts so it doesn't duplicate Quick Pick.
 
