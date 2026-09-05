@@ -29,14 +29,26 @@ Richness scales by level: A2 adds a common-mistake tip, B1 adds collocations and
 ## Modes
 Study · Sentence Gap · Memory Pairs · Quick Pick · Word Race · Word Climb (Leitner) · Board Mode (two teams, projector) · Print
 
-- **Sentence Gap** — the example sentence with the target word blanked, four options, plus the
-  definition shown as a second cue.
+- **Sentence Gap** — the example sentence with the target word blanked, four options, no meaning
+  hint. The three wrong options are drawn level-wide and are grammatically impossible in the slot
+  (see below), so the sentence alone identifies the answer.
 
-### Two cues, always
-Sentence Gap, Quick Pick, Word Race and Word Climb all show **both** the definition and the gapped
-sentence — one as the main prompt, the other as a supporting hint. Neither is reliable alone: a gap
-like "Please give me some _____." accepts water, juice or cake, and some definitions within a theme
-are near-twins (walk/run, grandmother/grandfather). Together they identify exactly one word.
+### How each game stays distinct
+A gap like "Please give me some _____." accepts water, juice or cake, and some definitions within a
+theme are near-twins (walk/run, grandmother/grandfather). The three guessing games solve that
+differently, which is what keeps them from collapsing into each other:
+
+- **Sentence Gap** — no meaning hint. Wrong options are made *impossible* instead: they are picked
+  from across the level with a word class that cannot fill the slot ("Please give me some
+  water / eat / today / yellow"). Tests reading the sentence.
+- **Quick Pick** — definition is the prompt, gapped sentence is a supporting hint, distractors come
+  from the same theme. Tests meaning recall.
+- **Word Race** — timed, alternates which cue leads, both always shown.
+
+`impossibleFor()` enforces the distractor rule. A plain part-of-speech test is not enough, because
+words like *dress*, *watch*, *cook* and *water* work as both noun and verb — "My dress is broken"
+would read fine. `NOUNY_VERBS` and `VERBY_NOUNS` exclude those from the opposite slot. All 13,287
+candidate target/distractor pairs across A1 were checked: no violations, no same-word collisions.
 
 ### Gap invariant
 `gapSentence()` matches the **base form only** — no inflection guessing. Every example sentence must
