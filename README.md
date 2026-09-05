@@ -6,7 +6,10 @@ Live: https://arschul.github.io/vocab/
 ## Status
 - **A1** — 8 themes × 25 words (200 words) — built
 - **A2** — 8 themes × 25 words (200 words) — built, adds a common-mistake tip per word
-- B1 / B2 — planned
+- **B1** — 8 themes × 25 words (200 words) — built, adds collocations and word family
+- B2 — planned
+
+All data is American English (spelling and word choice).
 
 ## Structure
 - `index.html` — hash-routed shell (`#/level/theme/mode`), all modes and game logic inline
@@ -33,7 +36,19 @@ Study, Print, and on reveal in Word Climb and Board Mode:
   x:'I do not have enough money.', m:'Uncountable: much money, not many moneys.' }
 ```
 
-B1 will add collocations and word family, B2 usage notes and tags.
+B1 entries add `c`, an array of collocations, and `f`, the word family:
+
+```js
+{ w:'crime', pos:'noun', d:'an action that breaks the law',
+  x:'Reporting a crime takes ten minutes.',
+  m:'Commit a crime, not do or make a crime.',
+  c:['commit a crime','a serious crime','crime rate'],
+  f:'criminal (adj, n)' }
+```
+
+Collocations render as chips in Study and Print, and appear on reveal in Word Climb and Board Mode.
+Use `'\u2014'` for `f` when there is no useful family; it is skipped at render time.
+B2 will add usage notes and tags.
 
 ### Adding a level
 1. Write `data/<level>-<theme>.js` for each theme, then flip `ready: true` in `data/manifest.js`.
