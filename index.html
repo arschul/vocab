@@ -297,6 +297,29 @@ function getLeitner(key){ return lsGet('vocab-leitner',{})[key]||{}; }
 function setLeitner(key,obj){ const a=lsGet('vocab-leitner',{}); a[key]=obj; lsSet('vocab-leitner',a); }
 
 /* ─────────── helpers ─────────── */
+/* Words tagged verb that are also everyday nouns — unsafe as distractors in a noun slot
+   ("My dress is broken" would read fine). Same idea in reverse for VERBY_NOUNS. */
+const NOUNY_VERBS=new Set(['dress','drink','work','study','play','watch','sleep','cook','walk','run','start','finish','rest','shower','brush','wash','clean']);
+const VERBY_NOUNS=new Set(['water','fish','dress','watch','shower','name','cook','rain','snow','storm','wind','shelf','key','milk','pocket','uniform','size']);
+function isNounish(w){ return w.pos==='noun'||NOUNY_VERBS.has(w.w.toLowerCase()); }
+function isVerbish(w){ return w.pos==='verb'||VERBY_NOUNS.has(w.w.toLowerCase()); }
+/* Distractors that cannot grammatically fill the target's slot. */
+function impossibleFor(target,allWords){
+  const out=[], seen=new Set([target.w.toLowerCase()]);
+  allWords.forEach(c=>{
+    const lc=c.w.toLowerCase();
+    if(seen.has(lc)) return;
+    let ok;
+    if(target.pos==='noun')           ok=!isNounish(c);
+    else if(target.pos==='verb')      ok=!isVerbish(c);
+    else if(target.pos==='adjective') ok=c.pos!=='adjective';
+    else                              ok=c.pos!==target.pos;
+    if(ok){ seen.add(lc); out.push(c); }
+  });
+  return out;
+}
+function loadLevel(l){ return Promise.all(l.themes.map(t=>loadTheme(l.id,t.slug))); }
+
 function gapSentence(word,sent){
   const re=new RegExp('(^|[^A-Za-z])('+word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')(?![A-Za-z])','i');
   if(!re.test(sent)) return null;
@@ -562,46 +585,55 @@ function renderStudy(app,l,t,d,key){
 
 /* ── sentence gap ── */
 function renderGap(app,l,t,d,key){
-  const qs=shuffle(d.words); let i=0, score=0;
-  function ask(){
-    if(i>=qs.length) return done();
-    const w=qs[i];
-    const sent=gapSentence(w.w,w.x)||w.x;
-    const wrong=shuffle(d.words.filter(x=>x.w!==w.w)).slice(0,3);
-    const opts=shuffle([w,...wrong]);
-    app.innerHTML=`
-      <div class="gamehead"><h2>🧩 Sentence Gap</h2>
-        <div class="stat"><div>${i+1}/${qs.length}<span>sentence</span></div><div>${score}<span>correct</span></div></div>
-        <button class="btn ghost" onclick="go('${key}')">Quit</button></div>
-      <div class="bar"><i style="width:${i/qs.length*100}%"></i></div>
-      <div class="panel"><div class="prompt">
-        <div class="ppos">Which word fits?</div>
-        <div class="pgap">${esc(sent)}</div>
-        <div class="phint"><b>It means</b>${esc(w.d)}</div>
-      </div>
-      <div class="opts">${opts.map(o=>`<button class="opt" data-w="${esc(o.w)}">${esc(o.w)}</button>`).join('')}</div></div>`;
-    app.querySelectorAll('.opt').forEach(el=>el.onclick=()=>{
-      app.querySelectorAll('.opt').forEach(x=>{ x.onclick=null;
-        if(x.dataset.w===w.w) x.classList.add('right');
-        else if(x===el) x.classList.add('wrong');
+  app.innerHTML=`<div class="gamehead"><h2>🧩 Sentence Gap</h2>
+    <button class="btn ghost" onclick="go('${key}')">Quit</button></div>
+    <div class="panel"><div class="prompt"><div class="pdef">Getting the words ready…</div></div></div>`;
+  loadLevel(l).then(themes=>{
+    const bank=[]; themes.forEach(th=>th.words.forEach(w=>bank.push(w)));
+    start(bank);
+  }).catch(()=>start(d.words.slice()));
+
+  function start(bank){
+    const qs=shuffle(d.words); let i=0, score=0;
+    function ask(){
+      if(i>=qs.length) return done();
+      const w=qs[i];
+      const sent=gapSentence(w.w,w.x)||w.x;
+      const wrong=shuffle(impossibleFor(w,bank)).slice(0,3);
+      const opts=shuffle([w,...wrong]);
+      app.innerHTML=`
+        <div class="gamehead"><h2>🧩 Sentence Gap</h2>
+          <div class="stat"><div>${i+1}/${qs.length}<span>sentence</span></div><div>${score}<span>correct</span></div></div>
+          <button class="btn ghost" onclick="go('${key}')">Quit</button></div>
+        <div class="bar"><i style="width:${i/qs.length*100}%"></i></div>
+        <div class="panel"><div class="prompt">
+          <div class="ppos">Which word fits?</div>
+          <div class="pgap">${esc(sent)}</div>
+        </div>
+        <div class="opts">${opts.map(o=>`<button class="opt" data-w="${esc(o.w)}">${esc(o.w)}</button>`).join('')}</div></div>`;
+      app.querySelectorAll('.opt').forEach(el=>el.onclick=()=>{
+        app.querySelectorAll('.opt').forEach(x=>{ x.onclick=null;
+          if(x.dataset.w===w.w) x.classList.add('right');
+          else if(x===el) x.classList.add('wrong');
+        });
+        if(el.dataset.w===w.w) score++;
+        const p=app.querySelector('.pgap');
+        if(p) p.innerHTML=esc(w.x);
+        say(w.x);
+        i++; setTimeout(ask,1400);
       });
-      if(el.dataset.w===w.w) score++;
-      const p=app.querySelector('.pgap');
-      if(p) p.innerHTML=esc(w.x);
-      say(w.x);
-      i++; setTimeout(ask,1400);
-    });
+    }
+    function done(){
+      const perfect=score===qs.length;
+      const got=perfect?award(key,'gapper'):false;
+      app.innerHTML=`<div class="result"><div class="rem">${perfect?'🧩':'👍'}</div>
+        <h3>${score} / ${qs.length}</h3>
+        <p>${perfect?(got?'Badge unlocked: Gap Filler':'You already had the Gap Filler badge.'):'Get every sentence right to unlock the Gap Filler badge.'}</p>
+        <div class="btnrow"><button class="btn" onclick="go('${key}/gap')">Play again</button>
+        <button class="btn ghost" onclick="go('${key}')">Back to theme</button></div></div>`;
+    }
+    ask();
   }
-  function done(){
-    const perfect=score===qs.length;
-    const got=perfect?award(key,'gapper'):false;
-    app.innerHTML=`<div class="result"><div class="rem">${perfect?'🧩':'👍'}</div>
-      <h3>${score} / ${qs.length}</h3>
-      <p>${perfect?(got?'Badge unlocked: Gap Filler':'You already had the Gap Filler badge.'):'Get every sentence right to unlock the Gap Filler badge.'}</p>
-      <div class="btnrow"><button class="btn" onclick="go('${key}/gap')">Play again</button>
-      <button class="btn ghost" onclick="go('${key}')">Back to theme</button></div></div>`;
-  }
-  ask();
 }
 
 /* ── memory pairs: word ↔ meaning ── */
