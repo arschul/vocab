@@ -8,7 +8,7 @@ window.VOCAB_DATA['a1/food-drink'] = {
     {w:'cheese',pos:'noun',d:'a yellow or white food made from milk',x:'I like cheese on my pizza.'},
     {w:'chicken',pos:'noun',d:'meat from a bird people keep on farms',x:'My mother cooks chicken and rice.'},
     {w:'rice',pos:'noun',d:'small white grains people cook and eat',x:'We eat rice every day.'},
-    {w:'egg',pos:'noun',d:'a round white food from a bird',x:'He eats two eggs for breakfast.'},
+    {w:'egg',pos:'noun',d:'a round white food from a bird',x:'He eats an egg for breakfast.'},
     {w:'fish',pos:'noun',d:'an animal from water that people eat',x:'We have fish on Fridays.'},
     {w:'milk',pos:'noun',d:'a white drink from cows',x:'I drink milk before bed.'},
     {w:'water',pos:'noun',d:'a clear drink with no color',x:'Please give me some water.'},
