@@ -2,7 +2,7 @@ window.VOCAB_DATA = window.VOCAB_DATA || {};
 window.VOCAB_DATA['a2/town-directions'] = {
   level:'a2', slug:'town-directions', title:'Town & Directions', emoji:'\u{1F5FA}\uFE0F',
   words:[
-    {w:'town',pos:'noun',d:'a place with houses and shops, smaller than a city',x:'I grew up in a small town.',m:'In town means the centre, with no article.'},
+    {w:'town',pos:'noun',d:'a place with houses and shops, smaller than a city',x:'I grew up in a small town.',m:'In town means the center, with no article.'},
     {w:'village',pos:'noun',d:'a very small town in the countryside',x:'Her village has one shop.',m:'Village is smaller than a town, which is smaller than a city.'},
     {w:'street',pos:'noun',d:'a road in a town with buildings on it',x:'They live on a quiet street.',m:'On a street in American English, in a street in British.'},
     {w:'corner',pos:'noun',d:'the place where two streets meet',x:'The bakery is on the corner.',m:'On the corner outside, in the corner inside a room.'},
@@ -24,7 +24,7 @@ window.VOCAB_DATA['a2/town-directions'] = {
     {w:'near',pos:'preposition',d:'a short distance from something',x:'We live near the station.',m:'Near the station, with no to.'},
     {w:'far',pos:'adjective',d:'a long distance away',x:'The airport is too far to walk.',m:'Use far in questions and negatives; use a long way in positives.'},
     {w:'turn',pos:'verb',d:'to change the direction you are going',x:'Turn at the second corner.',m:'Turn left or turn right, no preposition.'},
-    {w:'follow',pos:'verb',d:'to go along a road or after someone',x:'Follow this road for a kilometre.',m:'Follow something, with no preposition.'},
+    {w:'follow',pos:'verb',d:'to go along a road or after someone',x:'Follow this road for a kilometer.',m:'Follow something, with no preposition.'},
     {w:'address',pos:'noun',d:'the details of where a place is',x:'Write your address on the form.',m:'Stress the second part: ad-DRESS.'},
     {w:'direction',pos:'noun',d:'the way you go to reach a place',x:'We walked in the wrong direction.',m:'In a direction, not to a direction. Directions means instructions.'}
   ]
