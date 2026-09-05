@@ -13,7 +13,7 @@ window.VOCAB_DATA['a2/feelings-personality'] = {
     {w:'nervous',pos:'adjective',d:'worried and a little afraid',x:'I feel nervous before a test.',m:'Nervous about something.'},
     {w:'proud',pos:'adjective',d:'pleased about something you or others did',x:'His parents are proud of him.',m:'Proud of, not proud for.'},
     {w:'shy',pos:'adjective',d:'uncomfortable with people you do not know',x:'He is too shy to speak first.',m:'Shy is about people; embarrassed is about a moment.'},
-    {w:'friendly',pos:'adjective',d:'kind and easy to talk to',x:'Our neighbours are very friendly.',m:'Friendly is an adjective even though it ends in -ly.'},
+    {w:'friendly',pos:'adjective',d:'kind and easy to talk to',x:'Our neighbors are very friendly.',m:'Friendly is an adjective even though it ends in -ly.'},
     {w:'kind',pos:'adjective',d:'caring about other people',x:'It was kind of you to help.',m:'Kind to someone. The same word also means type.'},
     {w:'polite',pos:'adjective',d:'showing good manners',x:'Always be polite to customers.',m:'Polite to someone.'},
     {w:'rude',pos:'adjective',d:'not polite',x:'It is rude to interrupt.',m:'Rude to someone.'},
