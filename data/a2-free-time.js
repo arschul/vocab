@@ -2,14 +2,14 @@ window.VOCAB_DATA = window.VOCAB_DATA || {};
 window.VOCAB_DATA['a2/free-time'] = {
   level:'a2', slug:'free-time', title:'Free Time & Hobbies', emoji:'\u{1F3B8}',
   words:[
-    {w:'hobby',pos:'noun',d:'something you enjoy doing in free time',x:'Photography is my favourite hobby.',m:'Plural is hobbies. Have a hobby, not make a hobby.'},
+    {w:'hobby',pos:'noun',d:'something you enjoy doing in free time',x:'Photography is my favorite hobby.',m:'Plural is hobbies. Have a hobby, not make a hobby.'},
     {w:'collect',pos:'verb',d:'to gather things of the same kind',x:'I collect old coins.',m:'Collect things; a collection is the group.'},
     {w:'painting',pos:'noun',d:'a picture made with paint',x:'She bought a painting for the hall.',m:'A painting is the object; painting is also the activity.'},
     {w:'drawing',pos:'noun',d:'a picture made with a pen or pencil',x:'His drawing won a prize.',m:'Draw with a pencil, paint with a brush.'},
     {w:'photography',pos:'noun',d:'the art of taking pictures',x:'He studies photography at college.',m:'Photography is the art; a photograph is one picture.'},
     {w:'concert',pos:'noun',d:'an event where music is played live',x:'We went to a concert last night.',m:'Go to a concert, not assist a concert.'},
     {w:'museum',pos:'noun',d:'a building showing important objects',x:'The museum opens at ten.',m:'Say it mew-ZEE-um.'},
-    {w:'theatre',pos:'noun',d:'a building where plays are performed',x:'They met outside the theatre.',m:'British theatre, American theater. Both are correct.'},
+    {w:'theater',pos:'noun',d:'a building where plays are performed',x:'They met outside the theater.',m:'American theater, British theatre. Both are correct.'},
     {w:'movie',pos:'noun',d:'a story shown on a screen',x:'The movie was three hours long.',m:'Movie and film mean the same thing.'},
     {w:'band',pos:'noun',d:'a group of people who play music',x:'My brother plays in a band.',m:'A band plays music; a group can be any people.'},
     {w:'instrument',pos:'noun',d:'a thing you play music on',x:'The guitar was my first instrument.',m:'Play an instrument, with the.'},
