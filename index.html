@@ -14,7 +14,7 @@
     --tangerine:#fb923c;--tangerine-deep:#3a1f0b;
     --grape:#c084fc;--grape-deep:#2a1440;
     --mint:#2dd4bf;--mint-deep:#0a2b28;
-    --good:#4ade80;--bad:#f87171;
+    --good:#4ade80;--bad:#f87171;--tangerine:#fb923c;
     --radius:20px;
   }
   :root[data-theme="light"]{
@@ -25,7 +25,7 @@
     --tangerine:#ea580c;--tangerine-deep:#ffedd5;
     --grape:#7c3aed;--grape-deep:#f0e9ff;
     --mint:#0d9488;--mint-deep:#d9faf5;
-    --good:#16a34a;--bad:#dc2626;
+    --good:#16a34a;--bad:#dc2626;--tangerine:#ea580c;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   body{
@@ -108,6 +108,9 @@
   .wordrow .wp{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-left:.45rem;}
   .wordrow .wd{color:var(--muted);font-size:.88rem;margin-top:.1rem;}
   .wordrow .wx{font-size:.85rem;font-style:italic;opacity:.8;margin-top:.25rem;}
+  .wordrow .wm{font-size:.8rem;color:var(--muted);margin-top:.45rem;padding-left:.6rem;border-left:2px solid var(--tangerine);}
+  .wordrow .wm b{font-family:'Baloo 2',cursive;font-weight:600;font-size:.65rem;letter-spacing:1.5px;
+    text-transform:uppercase;color:var(--tangerine);display:block;margin-bottom:.1rem;}
   .spk{background:none;border:1px solid var(--border);border-radius:10px;width:36px;height:36px;cursor:pointer;color:var(--muted);font-size:.95rem;flex-shrink:0;transition:all .18s;}
   .spk:hover{color:var(--sky);border-color:var(--sky);}
 
@@ -210,6 +213,7 @@
   .bstage .bdef{font-size:clamp(1.3rem,3.6vw,2.4rem);font-family:'Baloo 2',cursive;font-weight:600;max-width:22ch;line-height:1.3;}
   .bstage .bword{font-size:clamp(2.4rem,8vw,5.5rem);font-family:'Baloo 2',cursive;font-weight:800;color:var(--lime);}
   .bstage .bx{font-size:clamp(1rem,2.4vw,1.6rem);font-style:italic;color:var(--muted);max-width:28ch;}
+  .bstage .bm{font-size:clamp(.85rem,1.8vw,1.15rem);color:var(--tangerine);max-width:34ch;margin-top:.4rem;}
   .bctrl{display:flex;gap:.7rem;justify-content:center;margin-top:1rem;flex-wrap:wrap;}
   .bctrl .btn{padding:.85rem 2rem;font-size:1.15rem;}
 
@@ -299,8 +303,12 @@ function setLeitner(key,obj){ const a=lsGet('vocab-leitner',{}); a[key]=obj; lsS
 /* ─────────── helpers ─────────── */
 /* Words tagged verb that are also everyday nouns — unsafe as distractors in a noun slot
    ("My dress is broken" would read fine). Same idea in reverse for VERBY_NOUNS. */
-const NOUNY_VERBS=new Set(['dress','drink','work','study','play','watch','sleep','cook','walk','run','start','finish','rest','shower','brush','wash','clean']);
-const VERBY_NOUNS=new Set(['water','fish','dress','watch','shower','name','cook','rain','snow','storm','wind','shelf','key','milk','pocket','uniform','size']);
+const NOUNY_VERBS=new Set(['dress','drink','work','study','play','watch','sleep','cook','walk','run','start','finish','rest','shower','brush','wash','clean',
+  'pay','cost','order','cough','cure','travel','drive','ride','book','return','pass','fail','dance','swim','turn','hurt','collect','sell','buy','save','spend']);
+const VERBY_NOUNS=new Set(['water','fish','dress','watch','shower','name','cook','rain','snow','storm','wind','shelf','key','milk','pocket','uniform','size',
+  'price','discount','bill','queue','refund','offer','total','change','card','exercise','skin','bone','patient','trip','journey','ticket','station','train',
+  'taxi','delay','map','subject','mark','term','mistake','answer','question','project','practice','notes','band','puzzle','corner','square','bridge','market',
+  'bank','address','boss','interview','experience','engineer','contract','shift','nurse','timetable','crossing','direction','painting','drawing','movie']);
 function isNounish(w){ return w.pos==='noun'||NOUNY_VERBS.has(w.w.toLowerCase()); }
 function isVerbish(w){ return w.pos==='verb'||VERBY_NOUNS.has(w.w.toLowerCase()); }
 /* Distractors that cannot grammatically fill the target's slot. */
@@ -566,6 +574,7 @@ function renderStudy(app,l,t,d,key){
         <span class="ww">${esc(w.w)}</span><span class="wp">${esc(w.pos)}</span>
         <div class="wd">${esc(w.d)}</div>
         <div class="wx">“${esc(w.x)}”</div>
+        ${w.m?`<div class="wm"><b>Watch out</b>${esc(w.m)}</div>`:''}
       </div>
       <button class="spk" onclick="say(${JSON.stringify(w.w).replace(/"/g,'&quot;')})" title="Listen">🔊</button>
     </div>`).join('')+
@@ -807,7 +816,7 @@ function renderClimb(app,l,t,d,key){
       <div class="panel"><div class="prompt">
         <div class="ppos">${esc(w.pos)}</div>
         ${reveal
-          ? `<div class="pword">${esc(w.w)}</div><div class="pdef" style="color:var(--muted);font-size:1rem;margin-top:.5rem">${esc(w.d)}</div><div style="font-style:italic;color:var(--muted);margin-top:.6rem">\u201C${esc(w.x)}\u201D</div>`
+          ? `<div class="pword">${esc(w.w)}</div><div class="pdef" style="color:var(--muted);font-size:1rem;margin-top:.5rem">${esc(w.d)}</div><div style="font-style:italic;color:var(--muted);margin-top:.6rem">\u201C${esc(w.x)}\u201D</div>${w.m?`<div class="phint"><b>Watch out</b>${esc(w.m)}</div>`:''}`
           : `<div class="pdef">${esc(w.d)}</div>
              <div class="phint"><b>In a sentence</b>${esc(gapSentence(w.w,w.x)||w.x)}</div>`}
       </div>
@@ -864,7 +873,7 @@ function renderBoard(l,t,d,key){
       </div>
       <div class="bstage">
         <div class="bpos">${esc(w.pos)}</div>
-        ${reveal ? `<div class="bword">${esc(w.w)}</div><div class="bx">“${esc(w.x)}”</div>`
+        ${reveal ? `<div class="bword">${esc(w.w)}</div><div class="bx">“${esc(w.x)}”</div>${w.m?`<div class="bm">${esc(w.m)}</div>`:''}`
                  : `<div class="bdef">${esc(w.d)}</div><div class="bx">“${esc(gapSentence(w.w,w.x)||w.x)}”</div>`}
       </div>
       <div class="bctrl">
@@ -891,7 +900,8 @@ function renderPrint(app,l,t,d,key){
     <div class="panel">`+
     d.words.map(w=>`<div class="wordrow">
       <div class="wb"><span class="ww">${esc(w.w)}</span><span class="wp">${esc(w.pos)}</span>
-      <div class="wd">${esc(w.d)}</div><div class="wx">“${esc(w.x)}”</div></div>
+      <div class="wd">${esc(w.d)}</div><div class="wx">“${esc(w.x)}”</div>
+      ${w.m?`<div class="wm"><b>Watch out</b>${esc(w.m)}</div>`:''}</div>
     </div>`).join('')+`</div>`;
 }
 
