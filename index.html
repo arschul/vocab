@@ -108,6 +108,21 @@
   .wordrow .wp{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-left:.45rem;}
   .wordrow .wd{color:var(--muted);font-size:.88rem;margin-top:.1rem;}
   .wordrow .wx{font-size:.85rem;font-style:italic;opacity:.8;margin-top:.25rem;}
+  .wordrow .wu{font-size:.8rem;color:var(--muted);margin-top:.45rem;padding-left:.6rem;border-left:2px solid var(--lime);}
+  .wordrow .wu b{font-family:'Baloo 2',cursive;font-weight:600;font-size:.65rem;letter-spacing:1.5px;
+    text-transform:uppercase;color:var(--lime);display:block;margin-bottom:.15rem;}
+  .wordrow .wtags{margin-top:.5rem;}
+  .wordrow .wtags .tg{display:inline-block;border:1px solid var(--border);border-radius:100px;
+    padding:.08rem .5rem;margin:.12rem .25rem .12rem 0;font-size:.66rem;color:var(--muted);
+    letter-spacing:.5px;text-transform:uppercase;}
+  .wordrow .wt{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;
+    margin-left:.5rem;opacity:.8;}
+  .tagcta{
+    margin-top:2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1.4rem;flex-wrap:wrap;
+  }
+  .tagcta h3{font-size:1.25rem;margin-bottom:.3rem;}
+  .tagcta p{color:var(--muted);font-size:.88rem;line-height:1.6;max-width:52ch;}
   .wordrow .wc{font-size:.8rem;margin-top:.45rem;padding-left:.6rem;border-left:2px solid var(--sky);}
   .wordrow .wc span{display:inline-block;background:var(--surface-2);border-radius:100px;
     padding:.1rem .55rem;margin:.15rem .25rem .15rem 0;font-size:.75rem;color:var(--text);}
@@ -296,6 +311,14 @@ const BADGES = [
   {id:'climber',  ic:'🏔️', name:'Climber',     how:'Get every word to box 5'}
 ];
 
+const TAG_INFO={
+  academic:{ic:'\u{1F393}',name:'Academic',    blurb:'Words you will meet in essays, reports and research writing.'},
+  formal:{ic:'\u{1F3A9}',name:'Formal',        blurb:'For writing and formal speech, not casual conversation.'},
+  confusable:{ic:'\u{1F500}',name:'Easy to mix up',blurb:'Close to a similar word. Check the usage note before you use it.'},
+  uncountable:{ic:'\u{1F4A7}',name:'Uncountable',blurb:'No plural, no a or an. Watch the quantifier.'},
+  irregular:{ic:'\u26A1',name:'Irregular',     blurb:'Irregular plural or verb form. Learn it on its own.'},
+  linking:{ic:'\u{1F517}',name:'Linking',      blurb:'Words that join ideas and hold an argument together.'}
+};
 function lsGet(k,f){ try{ return JSON.parse(localStorage.getItem(k)) ?? f; }catch(e){ return f; } }
 function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
 
@@ -314,14 +337,16 @@ function setLeitner(key,obj){ const a=lsGet('vocab-leitner',{}); a[key]=obj; lsS
    ("My dress is broken" would read fine). Same idea in reverse for VERBY_NOUNS. */
 const NOUNY_VERBS=new Set(['dress','drink','work','study','play','watch','sleep','cook','walk','run','start','finish','rest','shower','brush','wash','clean',
   'pay','cost','order','cough','cure','travel','drive','ride','book','return','pass','fail','dance','swim','turn','hurt','collect','sell','buy','save','spend',
-  'search','broadcast','arrest','stretch','download','upload','refuse','support','trust','promise','respect','claim','doubt','score','defeat','repair','leak','rent','deposit','lease','review','damage','waste','litter','flood']);
+  'search','broadcast','arrest','stretch','download','upload','refuse','support','trust','promise','respect','claim','doubt','score','defeat','repair','leak','rent','deposit','lease','review','damage','waste','litter','flood',
+  'launch','forecast','budget','protest','reform','debate','focus','influence','trade','export','import','aid','settle','compromise','risk','benefit','consent','weigh','increase','decrease','peak','plateau','double','trade-off','vote','experiment','sample','estimate','reward','demand','supply','profit','merger','interpret','craft','average','rate','trend']);
 const VERBY_NOUNS=new Set(['water','fish','dress','watch','shower','name','cook','rain','snow','storm','wind','shelf','key','milk','pocket','uniform','size',
   'price','discount','bill','queue','refund','offer','total','change','card','exercise','skin','bone','patient','trip','journey','ticket','station','train',
   'taxi','delay','map','subject','mark','term','mistake','answer','question','project','practice','notes','band','puzzle','corner','square','bridge','market',
   'bank','address','boss','interview','experience','engineer','contract','shift','nurse','timetable','crossing','direction','painting','drawing','movie',
   'waste','fuel','damage','litter','flood','account','network','screen','update','headline','channel','source','rumor','bias','podcast','review','press',
   'couple','divorce','trust','support','promise','partner','gossip','respect','police','judge','court','witness','suspect','sentence','fine','team','coach',
-  'match','score','defeat','referee','rent','mortgage','mess','repair','leak','deposit','lease','doubt','claim','backup','settings','tactics','storage']);
+  'match','score','defeat','referee','rent','mortgage','mess','repair','leak','deposit','lease','doubt','claim','backup','settings','tactics','storage',
+  'profit','revenue','budget','forecast','launch','decline','asset','demand','supply','merger','research','experiment','sample','variable','theory','method','measurement','estimate','focus','influence','reward','habit','response','stimulus','trade','export','import','aid','protest','reform','debate','policy','vote','campaign','minister','authority','turnout','craft','portrait','critic','festival','patron','culture','border','identity','settle','risk','benefit','consent','precedent','scrutiny','trade-off','compromise','priority','alternative','trend','increase','decrease','peak','average','rate','growth','ratio','proportion','percentage','plateau','exhibition','performance','gallery']);
 function isNounish(w){ return w.pos==='noun'||NOUNY_VERBS.has(w.w.toLowerCase()); }
 function isVerbish(w){ return w.pos==='verb'||VERBY_NOUNS.has(w.w.toLowerCase()); }
 /* Distractors that cannot grammatically fill the target's slot. */
@@ -469,6 +494,7 @@ function route(){
   const lvl=M.levels.find(l=>l.id===p[0]);
   if(!lvl) return viewLevels();
   if(p.length===1) return viewThemes(lvl);
+  if(p[1]==='tags') return viewTagRoute(lvl,p[2],p[3]);
   const th=lvl.themes.find(t=>t.slug===p[1]);
   if(!th) return viewThemes(lvl);
   const mode=p[2]||'menu';
@@ -528,7 +554,119 @@ function viewThemes(l){
         <div class="badgerow">${BADGES.map(bd=>`<span class="bdot ${got[bd.id]?'on':''}" title="${esc(bd.name)}">${bd.ic}</span>`).join('')}</div>
       </button>`;
     }).join('')+
-  `</div>`;
+  `</div>`+
+  (l.tags?`<div class="tagcta">
+      <div>
+        <h3>Review across themes</h3>
+        <p>Pull every word in ${esc(l.name)} that shares a label \u2014 all the uncountable nouns, everything easy to mix up \u2014 whichever theme it came from.</p>
+      </div>
+      <button class="btn" onclick="go('${l.id}/tags')">Review by label \u2192</button>
+    </div>`:'');
+}
+
+/* ─────────── tag review: level scope, crosses themes ─────────── */
+function viewTagRoute(l,tag,mode){
+  const app=document.getElementById('app');
+  app.innerHTML=`<div class="panel"><div class="prompt"><div class="pdef">Gathering the words\u2026</div></div></div>`;
+  loadLevel(l).then(themes=>{
+    const bank=[];
+    themes.forEach(th=>th.words.forEach(w=>bank.push(Object.assign({},w,{theme:th.title}))));
+    if(!tag) return tagIndex(app,l,bank);
+    const set=bank.filter(w=>(w.t||[]).indexOf(tag)>=0);
+    if(!set.length) return tagIndex(app,l,bank);
+    if(mode==='drill') return tagDrill(app,l,tag,set,bank);
+    return tagList(app,l,tag,set);
+  }).catch(function(){ app.innerHTML='<div class="panel">Could not load this level.</div>'; });
+}
+
+function tagIndex(app,l,bank){
+  crumbs([{label:l.name,to:l.id},{label:'Labels'}]);
+  const counts={};
+  bank.forEach(w=>(w.t||[]).forEach(t=>counts[t]=(counts[t]||0)+1));
+  const order=Object.keys(TAG_INFO).filter(t=>counts[t]);
+  app.innerHTML=`
+    <div class="hero">
+      <p class="eyebrow">${esc(l.name)}</p>
+      <h1>Review by <span class="accent">label</span></h1>
+      <p>Every word carries labels. Pick one to pull that whole group together, across all eight themes.</p>
+    </div>
+    <div class="grid">`+
+    order.map((t,i)=>{
+      const info=TAG_INFO[t];
+      return `<button class="tile ${COLORS[i%6]}" onclick="go('${l.id}/tags/${t}')">
+        <span class="pill">${counts[t]} words</span>
+        <div class="big">${info.ic}</div>
+        <h2>${esc(info.name)}</h2>
+        <p>${esc(info.blurb)}</p>
+      </button>`;
+    }).join('')+`</div>`;
+}
+
+function tagList(app,l,tag,set){
+  const info=TAG_INFO[tag];
+  crumbs([{label:l.name,to:l.id},{label:'Labels',to:l.id+'/tags'},{label:info.name}]);
+  app.innerHTML=`
+    <div class="gamehead"><h2>${info.ic} ${esc(info.name)}</h2>
+      <div class="stat"><div>${set.length}<span>words</span></div></div>
+      <button class="btn ghost" onclick="go('${l.id}/tags')">\u2190 Labels</button></div>
+    <p style="color:var(--muted);margin-bottom:1.1rem;line-height:1.6">${esc(info.blurb)}</p>
+    <div class="btnrow" style="margin-top:0;margin-bottom:1.4rem">
+      <button class="btn" onclick="go('${l.id}/tags/${tag}/drill')">Drill these words \u26A1</button>
+    </div>
+    <div class="panel">`+
+    set.map(w=>`<div class="wordrow">
+      <div class="wb">
+        <span class="ww">${esc(w.w)}</span><span class="wp">${esc(w.pos)}</span>
+        <span class="wt">${esc(w.theme)}</span>
+        <div class="wd">${esc(w.d)}</div>
+        <div class="wx">\u201C${esc(w.x)}\u201D</div>
+        ${w.u?`<div class="wu"><b>Using it</b>${esc(w.u)}</div>`:''}
+      </div>
+      <button class="spk" onclick="say(${JSON.stringify(w.w).replace(/"/g,'&quot;')})" title="Listen">\u{1F50A}</button>
+    </div>`).join('')+`</div>`;
+}
+
+function tagDrill(app,l,tag,set,bank){
+  const info=TAG_INFO[tag];
+  crumbs([{label:l.name,to:l.id},{label:'Labels',to:l.id+'/tags'},{label:info.name}]);
+  const qs=shuffle(set).slice(0,Math.min(15,set.length));
+  let i=0, score=0;
+  function ask(){
+    if(i>=qs.length) return done();
+    const w=qs[i];
+    const wrong=shuffle(bank.filter(x=>x.w!==w.w)).slice(0,3);
+    const opts=shuffle([w].concat(wrong));
+    app.innerHTML=`
+      <div class="gamehead"><h2>${info.ic} ${esc(info.name)} drill</h2>
+        <div class="stat"><div>${i+1}/${qs.length}<span>question</span></div><div>${score}<span>correct</span></div></div>
+        <button class="btn ghost" onclick="go('${l.id}/tags/${tag}')">Quit</button></div>
+      <div class="bar"><i style="width:${i/qs.length*100}%"></i></div>
+      <div class="panel"><div class="prompt">
+        <div class="ppos">${esc(w.pos)} \u00B7 ${esc(w.theme)}</div>
+        <div class="pdef">${esc(w.d)}</div>
+        <div class="phint"><b>In a sentence</b>${esc(gapSentence(w.w,w.x)||w.x)}</div>
+      </div>
+      <div class="opts">${opts.map(o=>`<button class="opt" data-w="${esc(o.w)}">${esc(o.w)}</button>`).join('')}</div></div>`;
+    app.querySelectorAll('.opt').forEach(el=>el.onclick=()=>{
+      app.querySelectorAll('.opt').forEach(x=>{ x.onclick=null;
+        if(x.dataset.w===w.w) x.classList.add('right');
+        else if(x===el) x.classList.add('wrong');
+      });
+      if(el.dataset.w===w.w) score++;
+      say(w.w);
+      i++; setTimeout(ask,1100);
+    });
+  }
+  function done(){
+    app.innerHTML=`<div class="result"><div class="rem">${info.ic}</div>
+      <h3>${score} / ${qs.length}</h3>
+      <p>${esc(info.name)} words, pulled from every theme in ${esc(l.name)}.</p>
+      <div class="btnrow">
+        <button class="btn" onclick="go('${l.id}/tags/${tag}/drill')">Drill again</button>
+        <button class="btn ghost" onclick="go('${l.id}/tags/${tag}')">See the list</button>
+      </div></div>`;
+  }
+  ask();
 }
 
 /* ─────────── view: theme ─────────── */
@@ -589,7 +727,9 @@ function renderStudy(app,l,t,d,key){
         <div class="wx">“${esc(w.x)}”</div>
         ${w.c?`<div class="wc"><b>Goes with</b>${w.c.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:''}
         ${w.f&&w.f!=='—'?`<div class="wf"><b>Word family</b>${esc(w.f)}</div>`:''}
+        ${w.u?`<div class="wu"><b>Using it</b>${esc(w.u)}</div>`:''}
         ${w.m?`<div class="wm"><b>Watch out</b>${esc(w.m)}</div>`:''}
+        ${w.t?`<div class="wtags">${w.t.map(x=>`<span class="tg">${esc((TAG_INFO[x]||{}).name||x)}</span>`).join('')}</div>`:''}
       </div>
       <button class="spk" onclick="say(${JSON.stringify(w.w).replace(/"/g,'&quot;')})" title="Listen">🔊</button>
     </div>`).join('')+
@@ -831,7 +971,7 @@ function renderClimb(app,l,t,d,key){
       <div class="panel"><div class="prompt">
         <div class="ppos">${esc(w.pos)}</div>
         ${reveal
-          ? `<div class="pword">${esc(w.w)}</div><div class="pdef" style="color:var(--muted);font-size:1rem;margin-top:.5rem">${esc(w.d)}</div><div style="font-style:italic;color:var(--muted);margin-top:.6rem">\u201C${esc(w.x)}\u201D</div>${w.c?`<div class="phint"><b>Goes with</b>${esc(w.c.join(' · '))}</div>`:''}${w.m?`<div class="phint"><b>Watch out</b>${esc(w.m)}</div>`:''}`
+          ? `<div class="pword">${esc(w.w)}</div><div class="pdef" style="color:var(--muted);font-size:1rem;margin-top:.5rem">${esc(w.d)}</div><div style="font-style:italic;color:var(--muted);margin-top:.6rem">\u201C${esc(w.x)}\u201D</div>${w.c?`<div class="phint"><b>Goes with</b>${esc(w.c.join(' · '))}</div>`:''}${w.u?`<div class="phint"><b>Using it</b>${esc(w.u)}</div>`:''}${w.m?`<div class="phint"><b>Watch out</b>${esc(w.m)}</div>`:''}`
           : `<div class="pdef">${esc(w.d)}</div>
              <div class="phint"><b>In a sentence</b>${esc(gapSentence(w.w,w.x)||w.x)}</div>`}
       </div>
@@ -918,6 +1058,7 @@ function renderPrint(app,l,t,d,key){
       <div class="wd">${esc(w.d)}</div><div class="wx">“${esc(w.x)}”</div>
       ${w.c?`<div class="wc"><b>Goes with</b>${w.c.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:''}
       ${w.f&&w.f!=='—'?`<div class="wf"><b>Word family</b>${esc(w.f)}</div>`:''}
+      ${w.u?`<div class="wu"><b>Using it</b>${esc(w.u)}</div>`:''}
       ${w.m?`<div class="wm"><b>Watch out</b>${esc(w.m)}</div>`:''}</div>
     </div>`).join('')+`</div>`;
 }
