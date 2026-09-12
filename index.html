@@ -3,7 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- HUBGEN:theme start -->
+  <script>
+    (function(){try{var k="arschul:theme",v=localStorage.getItem(k);
+      if(!v){var old=["hub-theme","theme","gh-theme","adv-theme","reviews-theme","worksheets-theme"];
+        for(var i=0;i<old.length;i++){var o=localStorage.getItem(old[i]);if(o){v=o;break;}}
+        v=v||"dark";localStorage.setItem(k,v);}
+      var m=(v==="system")?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):v;
+      document.documentElement.setAttribute("data-theme",m);}catch(e){}})();
+  </script>
+<!-- HUBGEN:theme end -->
 <title>Vocab Hub — Phil Young's English School</title>
+<!-- HUBGEN:head start -->
+  <meta name="description" content="Gamified vocabulary sets from A1 to B2.">
+  <link rel="icon" href="https://arschul.github.io/assets/favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Vocab Hub">
+  <meta property="og:description" content="Gamified vocabulary sets from A1 to B2.">
+  <meta property="og:url" content="https://arschul.github.io/vocab/">
+  <link rel="stylesheet" href="https://arschul.github.io/assets/hub.v2.css">
+  <script defer src="https://arschul.github.io/assets/hub.v2.js"></script>
+  <style>:root{--hub-bg:var(--bg);--hub-surface:var(--surface);--hub-ink:var(--text);--hub-ink-soft:var(--muted);--hub-rule:var(--border);--hub-accent:var(--sky);--hub-radius:var(--radius);--hub-font-display:'Baloo 2', cursive;--hub-font-ui:'DM Sans', sans-serif;}</style>
+<!-- HUBGEN:head end -->
+<style>
+  /* fallback if the shared stylesheet fails to load — structure only */
+  .hub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(17rem,1fr));gap:1rem;}
+  .hub-card{display:flex;flex-direction:column;gap:.45rem;padding:1.1rem 1.25rem;
+    border:1px solid currentColor;border-radius:10px;text-decoration:none;color:inherit;opacity:.95;}
+  .hub-card[hidden]{display:none;}
+  .hub-card__title{margin:0;font-size:1.02rem;}
+  .hub-card__blurb{margin:0;font-size:.86rem;line-height:1.5;}
+</style>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -287,7 +317,9 @@
   <div class="crumbs" id="crumbs"></div>
   <button class="iconbtn" onclick="toggleVoicePanel()" title="Choose the voice">🗣️</button>
   <button class="iconbtn" id="theme-btn" onclick="toggleTheme()" title="Light / dark">🌙</button>
-  <button class="iconbtn" onclick="location.href='https://arschul.github.io/'" title="Classroom Hub">🏠</button>
+<!-- HUBGEN:backlink start -->
+  <a class="hub-backlink iconbtn" href="https://arschul.github.io/" title="Classroom Hub">🏠</a>
+<!-- HUBGEN:backlink end -->
 </div>
 
 <div class="voicepanel" id="voicepanel"></div>
@@ -1064,19 +1096,6 @@ function renderPrint(app,l,t,d,key){
 }
 
 /* ─────────── theme toggle ─────────── */
-function toggleTheme(){
-  const h=document.documentElement;
-  const next=h.getAttribute('data-theme')==='light'?'dark':'light';
-  h.setAttribute('data-theme',next);
-  document.getElementById('theme-btn').textContent=next==='light'?'☀️':'🌙';
-  localStorage.setItem('hub-theme',next);
-}
-(function(){
-  if(localStorage.getItem('hub-theme')==='light'){
-    document.documentElement.setAttribute('data-theme','light');
-    document.getElementById('theme-btn').textContent='☀️';
-  }
-})();
 
 route();
 </script>
